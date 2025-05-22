@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: dev
+
+weather:
+  api:
+    key: "72f5d0445e98b4a9dc76b9ad360a1355"
+
+# logging:
+#   level:
+#     root: Debug

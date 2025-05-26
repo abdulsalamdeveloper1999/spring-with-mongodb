@@ -1,9 +1,11 @@
 package com.asdevify.springWithMongo.services;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.asdevify.springWithMongo.entities.UserEntity;
 import org.bson.types.ObjectId;
@@ -60,14 +62,23 @@ public class JournalEntryService {
         return jEntryRepo.findAll();
     }
 
-    public Optional<JournalEntryEntity> findEntry(ObjectId id) throws Exception {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public JournalEntryEntity findEntry(ObjectId id) throws Exception {
+       try {
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         UserEntity user = userRepo.findByUsername(username);
         if (user == null) {
             throw new IllegalAccessException("User not found");
         }
-        return jEntryRepo.findById(id);
+         Optional<JournalEntryEntity> jentry = user.getJournalEntryEntities().stream().filter(entry -> entry.getId().equals(id)).findFirst();
+               if (!jentry.isPresent()) {
+                throw new RuntimeException("entry not found");
+               }
+               return jentry.get();
+       } catch (Exception e) {
+                throw new RuntimeException("Error: "+e.getMessage());
+       }
+
     }
 
     @Transactional
@@ -95,16 +106,15 @@ public class JournalEntryService {
     }
 
     public JournalEntryEntity updateEntry(ObjectId id, JournalEntryEntity newEntry) {
-    return jEntryRepo.findById(id).map(oldEntry -> {
-        if (newEntry.getTitle() != null && !newEntry.getTitle().isEmpty()) {
-            oldEntry.setTitle(newEntry.getTitle());
-        }
-        if (newEntry.getContent() != null && !newEntry.getContent().isEmpty()) {
-            oldEntry.setContent(newEntry.getContent());
-        }
-        return jEntryRepo.save(oldEntry);
-    }).orElse(null); // or throw an exception if entry not found
-}
-
+        return jEntryRepo.findById(id).map(oldEntry -> {
+            if (newEntry.getTitle() != null && !newEntry.getTitle().isEmpty()) {
+                oldEntry.setTitle(newEntry.getTitle());
+            }
+            if (newEntry.getContent() != null && !newEntry.getContent().isEmpty()) {
+                oldEntry.setContent(newEntry.getContent());
+            }
+            return jEntryRepo.save(oldEntry);
+        }).orElse(null); // or throw an exception if entry not found
+    }
 
 }

@@ -1,11 +1,12 @@
 package com.asdevify.springWithMongo.controllers;
 
 import java.util.List;
-
+import java.util.Optional;
 
 import com.asdevify.springWithMongo.entities.UserEntity;
 import com.asdevify.springWithMongo.services.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.bson.types.ObjectId;
@@ -65,7 +66,9 @@ public class JournalEntryController {
     // return jEntryService.getAll();`Ï
     // }
 
+    
     @GetMapping("get-entries")
+    @Operation(summary = "Get all user journals")
     public ResponseEntity<?> getEntriesOfUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -126,5 +129,23 @@ private ResponseEntity<?> update(@PathVariable ObjectId id,
         return new ResponseEntity<>("Error updating entry: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
+
+    @GetMapping("find-entry/{id}")  
+    public ResponseEntity<?> findEntity(@PathVariable("id") String entryId) throws Exception{
+      try {
+          ObjectId id=new ObjectId(entryId);
+        JournalEntryEntity entry = jEntryService.findEntry(id);
+        if (entry==null) {
+             return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+        }
+
+         return new ResponseEntity<>(entry,HttpStatus.OK);
+      } catch (Exception e) {
+             return new ResponseEntity<>("Error: "+e.getMessage(),HttpStatus.NOT_FOUND);
+      }
+    }
+ 
+
 
 }

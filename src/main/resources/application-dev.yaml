@@ -14,19 +14,23 @@
 spring:
   application:
     name: springWithMongo
+
   redis:
     port: 6379
     host: localhost
-    data:
-    mongodb:
+  
+  data:
+     mongodb:
       uri: mongodb+srv://abdulsalamdev1999:oHzlglHYXqH2FdzJ@cluster0.wmvhczw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
       database: journaldb
       auto-index-creation: true
+      ssl:
+       enabled: true
   main:
     allow-circular-references: true  
 
 
 server:
-  port: 8080
+  port: 8082
   servlet:
-    context-path: /journal
+    context-path: /

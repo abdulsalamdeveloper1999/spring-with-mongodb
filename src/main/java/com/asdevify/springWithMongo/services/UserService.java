@@ -1,7 +1,11 @@
 package com.asdevify.springWithMongo.services;
 
+import com.asdevify.springWithMongo.dtos.UserDto;
 import com.asdevify.springWithMongo.entities.UserEntity;
 import com.asdevify.springWithMongo.repositories.UserRepo;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class UserService {
 
     
@@ -28,13 +33,26 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserEntity createUser(UserEntity user) {
+    public UserEntity createUser(UserDto user) throws Exception{
+       try {
+       UserEntity byUsername = userRepo.findByUsername(user.getUsername());
+        if (byUsername!=null) {
+            throw new Exception("user already exist");
+        }
 
-        user.setCreateAt(LocalDate.now());
-        user.setRoles(user.getRoles());
+        UserEntity userEntity=new UserEntity();
+
+        userEntity.setCreateAt(LocalDate.now());
+        userEntity.setRoles(user.getRoles());
         
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepo.save(user);
+        userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+        log.info("user has been created"+userEntity);
+
+        return userRepo.save(userEntity);
+       } catch (Exception e) {
+        log.error(e.getMessage());
+        throw new RuntimeException("Error:---"+e.getMessage());
+       }
 
     }
 
